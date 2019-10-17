@@ -15,6 +15,10 @@
                     @endif
 
                     You are logged in!
+
+                </div>
+                <div class="text-center mb-2">
+                    <a href="{{ route('questions.index') }}" class="btn btn-lg btn-primary">Show me questions</a>
                 </div>
             </div>
         </div>

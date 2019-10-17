@@ -16560,6 +16560,7 @@ form.form-delete {
   color: #adb5bd;
 }
 
+.vote-controls a.favorite.favorited,
 .vote-controls a.favorite.favorite:hover {
   color: #ffed4a;
 }

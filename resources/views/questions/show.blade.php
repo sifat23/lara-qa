@@ -17,17 +17,31 @@
 
                     <div class="media">
                         <div class="d-flex flex-column vote-controls">
-                            <a title="This question is useful" class="vote-up">
+                            <a title="This question is useful" class="vote-up {{ Auth::guest() ? 'off' : '' }}" onclick="event.preventDefault(); document.getElementById('up-vote-question-{{ $question->id }}').submit();">
                                 <i class="fas fa-caret-up fa-3x"></i>
                             </a>
-                            <span class="votes-count">1223</span>
-                            <a title="this question is not useful" class="vote-down off">
+                            <form id="up-vote-question-{{ $question->id }}" action="/questions/{{ $question->id }}/vote" method="post" style="dislpay: none;">
+                                @csrf
+                                <input type="hidden" name="vote" value="1">
+                            </form>
+                            <span class="votes-count">{{ questions->votes_count }}</span>
+                            <a title="this question is not useful" class="vote-down {{ Auth::guest() ? 'off' : '' }}" onclick="event.preventDefault(); document.getElementById('down-vote-question-{{ $question->id }}').submit();">
                                 <i class="fas fa-caret-down fa-3x"></i>
                             </a>
-                            <a title="Click to mark as favorite question (Click again to undo)" class="favorite mt-2 favorited">
+                            <form id="down-vote-question-{{ $question->id }}" action="/questions/{{ $question->id }}/vote" method="post" style="dislpay: none;">
+                                @csrf
+                                <input type="hidden" name="vote" value="-1">
+                            </form>
+                            <a onclick="event.preventDefault(); document.getElementById('favorite_question-{{ $question->id }}').submit();" title="Click to mark as favorite question (Click again to undo)" class="favorite mt-2 {{ Auth::guest() ? 'off' : ($question->is_favorited ? 'favorited' : '') }}">
                                 <i class="fas fa-star fa-2x"></i>
-                                <span class="favorites-count">123</span>
+                                <span class="favorites-count">{{ $question->favorites_count}}</span>
                             </a>
+                            <form id="favorite_question-{{ $question->id }}" action="/questions/{{ $question->id }}/favorites" method="post" style="dislpay: none;">
+                                @csrf
+                                @if ($question->is_favorited)
+                                    @method ('DELETE')
+                                @endif
+                            </form>
                         </div>
                         <div class="media-body">
                             {!! $question->body_html !!}
@@ -50,50 +64,10 @@
             </div>
         </div>
     </div>
-    <div class="row justify-content-center mt-2">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-body">
-                    <div class="card-title">
-                        <h2>{{ $question->answers_count . " " . str_plural('Answer', $question->answers_count) }}</h2>
-                    </div>
-                    <hr>
-                    @foreach ($question->answers as $answer)
-                    <div class="media">
-                        <div class="d-flex flex-column vote-controls">
-                            <a title="This answer is useful" class="vote-up">
-                                <i class="fas fa-caret-up fa-3x"></i>
-                            </a>
-                            <span class="votes-count">1223</span>
-                            <a title="this answer is not useful" class="vote-down off">
-                                <i class="fas fa-caret-down fa-3x"></i>
-                            </a>
-                            <a title="mark this answer is best answer" class="vote-accepted mt-2">
-                                <i class="fas fa-check fa-2x"></i>
-                            </a>
-                        </div>
-                        <div class="media-body">
-                            {!! $answer->body_html !!}
-                            <div class="float-right">
-                                <span class="text-muted">Answerd {{ $answer->created_date }}</span>
-                                <div class="media mt-2">
-                                    <a href="{{ $answer->user->url }}" class="ps-2">
-                                        <img src="{{ $answer->user->avater }}" alt="">
-                                    </a>
-                                    <div class="media-body ml-1 mt-1">
-                                        <a href="{{ $answer->user->url }}">
-                                            {{ $answer->user->name }}
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <hr>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-    </div>
+    @include ('answers._index', [
+        'answers' => $question->answers,
+        'answersCount' => $question->answers_count,
+    ])
+    @include ('answers._create')
 </div>
 @endsection
